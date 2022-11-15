@@ -44,10 +44,21 @@ class UserController {
       return res.json(user)
    }
 
-   async setStatus(req, res) {
-      const { status } = req.body
+   async updateProfile(req, res) {
+      const { _id } = req.query
 
-      const user = await User.findByIdAndUpdate()
+      const { status, fullName, age, location, contacts } = req.body
+
+      let update
+
+      if (status) {
+         update = { status }
+      } else {
+         update = { fullName, age, location, contacts }
+      }
+
+      const user = await User.findByIdAndUpdate({ _id: new ObjectId(_id) }, update)
+      return res.json(user)
    }
 }
 

@@ -4,7 +4,7 @@ class AuthController {
    async me(req, res) {
       const [data] = await AuthMe.find()
 
-      return res.json(data.me)
+      return res.json(data)
    }
 
    async checkLogin(req, res) {
