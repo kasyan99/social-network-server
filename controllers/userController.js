@@ -11,6 +11,7 @@ class UserController {
       let offset = _page * _limit - _limit
 
       let users = []
+      let totalCount = 0
 
       let followedValue = null
 
@@ -22,18 +23,22 @@ class UserController {
 
       if (fullName_like && !followed) {
          users = await User.find({ fullName: { $regex: fullName_like, $options: 'i' } }).skip(offset).limit(_limit)
+         totalCount = (await User.find({ fullName: { $regex: fullName_like, $options: 'i' } })).length
       }
       else if (!fullName_like && followed) {
          users = await User.find({ followed: followedValue }).skip(offset).limit(_limit)
+         totalCount = (await User.find({ followed: followedValue })).length
       }
       else if (fullName_like && followed) {
          users = await User.find({ followed: followedValue, fullName: { $regex: fullName_like, $options: 'i' } }).skip(offset).limit(_limit)
+         totalCount = (await User.find({ followed: followedValue, fullName: { $regex: fullName_like, $options: 'i' } })).length
       }
       else {
          users = await User.find().skip(offset).limit(_limit)
+         totalCount = (await User.find()).length
       }
 
-      return res.json(users)
+      return res.json({ users, totalCount })
    }
 
    async getOneById(req, res) {
@@ -47,13 +52,20 @@ class UserController {
    async updateProfile(req, res) {
       const { _id } = req.query
 
-      const { status, fullName, age, location, contacts } = req.body
+      const { followed, status, fullName, age, location, contacts } = req.body
 
       let update
 
-      if (status) {
+      //to subscribe/unsubscribe
+      if (followed !== undefined) {
+         update = { followed }
+      }
+      //to change status
+      else if (status) {
          update = { status }
-      } else {
+      }
+      //to change profile info
+      else {
          update = { fullName, age, location, contacts }
       }
 
